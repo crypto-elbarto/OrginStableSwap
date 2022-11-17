@@ -16,7 +16,11 @@ import time
 from pandas.io.json import json_normalize
 import json
 
-st.set_page_config(page_title = "Rook Stablecoin Testing Wallet", layout="wide")
+from datetime import date
+
+today = date.today()
+
+st.set_page_config(page_title = "Orign Stablecoin Swaps", layout="wide")
 
 
 
@@ -24,7 +28,7 @@ st.set_page_config(page_title = "Rook Stablecoin Testing Wallet", layout="wide")
 #Write the necessary functions
 @st.cache
 def get_rook_reward():
-    url = "https://api.rook.finance/api/v1/coordinator/userClaims?user=0xca77dc47eec9e1c46c9f541ba0f222e741d6236b"
+    url = "https://api.rook.finance/api/v1/coordinator/userClaims?user=0x15635F556534B94E77bde0154d7f36B1f2532cDA"
     response = (requests.get(url).json())
     earning_to_date = (response['latestCommitment']['earningsToDate'])/pow(10,18)
     total_claimed = (response['totalClaimed'])/pow(10,18)
@@ -36,7 +40,7 @@ def get_rook_reward():
 #------------------------------------------------------------------------#
 #Constants
 
-testing_wallet = str.lower("0xca77dc47eec9e1c46c9f541ba0f222e741d6236b")
+testing_wallet = str.lower("0x15635F556534B94E77bde0154d7f36B1f2532cDA")
 multisig_1 = str.lower("0x722f531740937fc21A2FaC7648670C7f2872A1c7")
 multisig_2 = str.lower("0xDAAf6D0ab259053Bb601eeE69880F30C7d8e5853")
 multisig_3 = str.lower("0x3C3ca4E5AbF0C1Bec701375ff31342d90D8C435E")
@@ -101,7 +105,7 @@ df_token_transfers_all= pd.json_normalize(transfers_list)     #transform into df
                                         
 df_token_transfers_all_w_metadata = df_token_transfers_all.merge(token_metadata, how='left', left_on='contract_address', right_on='contract_address').assign(token_amount = lambda x: token_amount(x))
 
-names_dict = {'0xca77dc47eec9e1c46c9f541ba0f222e741d6236b':'Testing Wallet'}
+names_dict = {'0x15635F556534B94E77bde0154d7f36B1f2532cDA':'Testing Wallet'}
 token_transfers = df_token_transfers_all_w_metadata[['transaction_hash', 'timestamp', 'contract_address','symbol', 'token_amount', 'from', 'to']].rename(columns={'transaction_hash':'tx_hash', 'contract_address':'token_contract_address', 'from':'sender', 'to':'receiver'}).replace({'sender': names_dict, 'receiver':names_dict}).sort_values('timestamp', ascending=False)
 
 token_transfer_from = token_transfers[token_transfers['sender']=='Testing Wallet']
@@ -143,16 +147,43 @@ token_sent_sum=token_sent_sum[token_sent_sum['cumsum']>0].sort_values(['date', '
 st.title("Rook Multisig Testing Wallet")
 st.write("Learn More: [KIP-30](https://forum.rook.fi/t/kip-30-temporarily-empower-and-fund-a-strategy-testing-multisig/395)")
 
-
 #-------------------------------------------------------------------------#
 # Show the amount of Rook that has been earned using columns
 rook_earned_col, rook_claimed_col, rook_claimable_col,cumulative_volume  = st.columns(spec=4, gap="small")
+
+st.header("ROI")
+
+roi_1,roi_2, roi_3 = st.columns(spec=3,gap="small")
 
 st.header("Current Balances")
 
 stablecol_1, stablecol_2, stablecol_3, stablecol_4 = st.columns(spec=4, gap="small")
 
+rebate_comb = pd.DataFrame(columns=['txHash','userRookRebate','rookPrice'])
+for i in range(1,1000000):
+    try:
+        rebate_url = "https://api.rook.finance/api/v1/trade/fills?makerAddresses=0x15635F556534B94E77bde0154d7f36B1f2532cDA&page="+str(i)+"&size=100"
+        response = requests.get(rebate_url)
+        parsed = json.loads(response.content)
+        rebate_df = json_normalize(parsed['items'])
+        rebate_df = rebate_df[['txHash','userRookRebate','rookPrice']]
+        rebate_comb = rebate_comb.append(rebate_df)
+    except:
+        break
 
+rebate_comb['rewards'] = rebate_comb['userRookRebate'] * rebate_comb['rookPrice']
+time_between = date.today() - date(2022, 8, 24)
+time_between.days
+with roi_1:
+    st.metric(label="Total USD Earned", value=f"{rebate_comb['rewards'].sum():.2f} $USD")
+    
+with roi_2:
+    st.metric(label="ROI", value=f"{rebate_comb['rewards'].sum()/600000*100:.2f} % ROI")
+    
+with roi_3:
+    st.metric(label="Effective API", value=f"{(rebate_comb['rewards'].sum()/600000*100) * (365/time_between.days):.2f} % Effective ROI")
+        
+        
 #-----------------------------------------------------------------------------------#
 #------------------Create Pie Charts for Showing Wallet Balances--------------------#
 labels = ["USDC", "USDT", "DAI", "FRAX"]
@@ -277,18 +308,6 @@ trading_df=token_sent.copy()
 trading_df = trading_df[['tx_hash', 'timestamp_x','symbol_x', 'symbol_y', 'path', 'token_amount_x']].sort_values('timestamp_x', ascending=True)
 trading_df['cumsum'] = trading_df.groupby(['symbol_x'])['token_amount_x'].cumsum()
 
-rebate_comb = pd.DataFrame(columns=['txHash','userRookRebate','rookPrice'])
-for i in range(1,1000000):
-    try:
-        rebate_url = "https://api.rook.finance/api/v1/trade/fills?makerAddresses=0xca77dc47eec9e1c46c9f541ba0f222e741d6236b&page="+str(i)+"&size=100"
-        response = requests.get(rebate_url)
-        parsed = json.loads(response.content)
-        rebate_df = json_normalize(parsed['items'])
-        rebate_df = rebate_df[['txHash','userRookRebate','rookPrice']]
-        rebate_comb = rebate_comb.append(rebate_df)
-    except:
-        break
-
 
 trading_df.rename(columns={'tx_hash':'Transaction Hash', 'timestamp_x':'Timestamp', 'path':'Trade Path', 'token_amount_x':'USD Value', 'cumsum':'Token Total'}, inplace=True)
 
@@ -388,7 +407,7 @@ with st.sidebar:
 
 with sidebar_expander_contracts:
     st.subheader("Contracts associated with the testing wallet")
-    st.write("Multisig Wallet: 0xca77dc47eec9e1c46c9f541ba0f222e741d6236b")
+    st.write("Multisig Wallet: 0x15635F556534B94E77bde0154d7f36B1f2532cDA")
     st.subheader("Multisig Signers as specified in KIP 30")
     st.write("Signer 1: 0x722f531740937fc21A2FaC7648670C7f2872A1c7")
     st.write("Signer 2: 0xDAAf6D0ab259053Bb601eeE69880F30C7d8e5853")
