@@ -47,7 +47,7 @@ multisig_3 = str.lower("0x3C3ca4E5AbF0C1Bec701375ff31342d90D8C435E")
 
 contract_address_usdc = str.lower("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
 contract_address_dai = str.lower('0x6B175474E89094C44Da98b954EedeAC495271d0F')
-contract_address_frax = str.lower('0x853d955aCEf822Db058eb8505911ED77F175b99e')
+contract_address_ousd = str.lower('0x2a8e1e676ec238d8a992307b495b45b3feaa5e86')
 contract_address_usdt = str.lower('0xdAC17F958D2ee523a2206206994597C13D831ec7')
 contract_address_rook = str.lower('0xfA5047c9c78B8877af97BDcb85Db743fD7313d4a')
 contract_address_weth = str.lower('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')
@@ -61,7 +61,7 @@ api=Transpose(TRANSPOSE_API_KEY)
 
 #use transpose API to pull the data
 token_metadata=pd.DataFrame()
-contract_list = [contract_address_usdc, contract_address_dai, contract_address_frax, contract_address_usdt, contract_address_weth, contract_address_rook]
+contract_list = [contract_address_usdc, contract_address_dai, contract_address_ousd, contract_address_usdt, contract_address_weth, contract_address_rook]
 for contract in contract_list:
     temp_list = []
     temp_metadata = api.bulk_request(api.token.tokens_by_contract_address(contract), requests_per_second=0.33)
@@ -186,9 +186,9 @@ with roi_3:
         
 #-----------------------------------------------------------------------------------#
 #------------------Create Pie Charts for Showing Wallet Balances--------------------#
-labels = ["USDC", "USDT", "DAI", "FRAX"]
-wallet_balances = [f"{float(bal[bal['name'] == 'USD Coin']['amount']):.0f}",f"{float(bal[bal['name'] == 'Tether USD']['amount']):.0f}", f"{float(bal[bal['name'] == 'Dai Stablecoin']['amount']):.0f}", f"{float(bal[bal['name'] == 'Frax']['amount']):.0f}"]
-stablecoin_volume = [token_sent[token_sent['symbol_x']=='USDC']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='USDT']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='DAI']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='FRAX']['token_amount_x'].sum()]
+labels = ["USDC", "USDT", "DAI", "OUSD"]
+wallet_balances = [f"{float(bal[bal['name'] == 'USD Coin']['amount']):.0f}",f"{float(bal[bal['name'] == 'Tether USD']['amount']):.0f}", f"{float(bal[bal['name'] == 'Dai Stablecoin']['amount']):.0f}", f"{float(bal[bal['name'] == 'Origin Dollar']['amount']):.0f}"]
+stablecoin_volume = [token_sent[token_sent['symbol_x']=='USDC']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='USDT']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='DAI']['token_amount_x'].sum(), token_sent[token_sent['symbol_x']=='OUSD']['token_amount_x'].sum()]
 # Create subplots: use 'domain' type for Pie subplot
 fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
 fig.add_trace(go.Pie(labels=labels, values=wallet_balances, name="Stablecoin Balances"),
@@ -289,18 +289,18 @@ with stable_vol_3:
     st.dataframe(usdt_df.style.format(precision=0, formatter={'token_amount_x':"${:,.0f}"}))
 
 with stablecol_4:
-    st.subheader("FRAX")
-    frax_balance = float(bal[bal['name'] == 'Frax']['amount'])
-    change = (frax_balance-150000)/150000
-    st.metric(label="FRAX", value = f"${frax_balance:,.0f}", delta =f"{change:.2%}")
+    st.subheader("OUSD")
+    ousd_balance = float(bal[bal['name'] == 'Ousd']['amount'])
+    change = (ousd_balance-150000)/150000
+    st.metric(label="OUSD", value = f"${ousd_balance:,.0f}", delta =f"{change:.2%}")
 
 with stable_vol_4:
-    total_frax_volume = token_sent[token_sent['symbol_x']=='FRAX']['token_amount_x'].sum()
-    st.metric(label="FRAX Volume", value=f"${total_frax_volume:,.0f}")
-    frax_df = token_sent[(token_sent['symbol_x']=='FRAX') | (token_sent['symbol_y']=='FRAX')][['timestamp_x', 'path', 'token_amount_x']].sort_values(by='timestamp_x', ascending=False)
+    total_ousd_volume = token_sent[token_sent['symbol_x']=='OUSD']['token_amount_x'].sum()
+    st.metric(label="OUSD Volume", value=f"${total_ousd_volume:,.0f}")
+    ousd_df = token_sent[(token_sent['symbol_x']=='OUSD') | (token_sent['symbol_y']=='OUSD')][['timestamp_x', 'path', 'token_amount_x']].sort_values(by='timestamp_x', ascending=False)
     # pd.set_option('display.float_format', '${:,}'.format)
-    # style = frax_df.style.apply(lambda x: "${x:,.0f}".format)
-    st.dataframe(frax_df.style.format(precision=0, formatter={'token_amount_x':"${:,.0f}"}))
+    # style = ousd_df.style.apply(lambda x: "${x:,.0f}".format)
+    st.dataframe(ousd_df.style.format(precision=0, formatter={'token_amount_x':"${:,.0f}"}))
 
 
     
@@ -365,7 +365,7 @@ with trading_details_expander:
     
     # trading_df = trading_df.rename(columns = {'tx_hash':'Transaction Hash', 'timestamp_x':'Timestamp', 'path':'Trade Path', 'token_amount_x':'USD Value', 'cumsum':'Path Total USD Volume'})
     if filter_radio == 'Stablecoin':
-        filter= st.radio('Select Token:', ['USDC', 'USDT', 'DAI', 'FRAX'])
+        filter= st.radio('Select Token:', ['USDC', 'USDT', 'DAI', 'OUSD'])
         filter_mask = trading_df['symbol_x']==filter
         
         filtered_trading_df = trading_df[filter_mask]
@@ -383,7 +383,7 @@ with trading_details_expander:
     #                                                                'Token Total':"${:,.0f}"})
     # dtf = trading_df.style.format(precision=0, formatter={'USD Value':"${:,.0f}",
                                                                 #    'Token Total':"${:,.0f}"})
-    # frax_df.style.format(precision=0, formatter={'token_amount_x':"${:,.0f}"}))
+    # ousd_df.style.format(precision=0, formatter={'token_amount_x':"${:,.0f}"}))
     AgGrid(filtered_trading_df, gridOptions=gridOptions, height=500, width='100%', fit_columns_on_grid_load=True)
     
     @st.cache
