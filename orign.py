@@ -278,7 +278,7 @@ with stablecol_3:
     st.subheader("USDT")
 
     usdt_balance = float(bal[bal['name'] == 'Tether USD']['amount'])
-    change = (usdt_balance-150000)/150000
+    change = (usdt_balance-50000)/50000
     st.metric(label="USDT", value = f"${usdt_balance:,.2f}", delta =f"{change:.2%}")
 
 with stable_vol_3:
@@ -290,8 +290,8 @@ with stable_vol_3:
 
 with stablecol_4:
     st.subheader("OUSD")
-    ousd_balance = float(bal[bal['name'] == 'OUSD']['amount'])
-    change = (ousd_balance-150000)/150000
+    ousd_balance = float(bal[bal['name'] == 'Origin Dollar']['amount'])
+    change = (ousd_balance-25000)/25000
     st.metric(label="OUSD", value = f"${ousd_balance:,.0f}", delta =f"{change:.2%}")
 
 with stable_vol_4:
