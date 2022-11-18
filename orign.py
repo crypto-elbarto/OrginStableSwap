@@ -197,7 +197,7 @@ fig.add_trace(go.Pie(labels=labels, values=stablecoin_volume, name="Trading Volu
 # Use `hole` to create a donut-like pie chart
 fig.update_traces(text=labels, hole=.4, hoverinfo="label+percent+value")
 fig.update_layout(
-    title_text="Current Wallet Testing Wallet Balances & Volume",
+    title_text="Origin Testing Wallet Balances & Volume",
     # Add annotations in the center of the donut pies.
     annotations=[dict(text='Balance', x=0.2, y=0.50, font_size=25, showarrow=False),
                  dict(text='Volume', x=0.80, y=0.5, font_size=25, showarrow=False)],
@@ -277,7 +277,7 @@ with stablecol_3:
     st.subheader("USDT")
 
     usdt_balance = float(bal[bal['name'] == 'Tether USD']['amount'])
-    change = (usdt_balance-50000)/50000
+    change = (usdt_balance-25000)/25000
     st.metric(label="USDT", value = f"${usdt_balance:,.2f}", delta =f"{change:.2%}")
 
 with stable_vol_3:
