@@ -20,7 +20,7 @@ from datetime import date
 
 today = date.today()
 
-st.set_page_config(page_title = "Orign Stablecoin Swaps", layout="wide")
+st.set_page_config(page_title = "Origin Stablecoin Swaps", layout="wide")
 
 
 
@@ -144,8 +144,7 @@ token_sent_sum=token_sent_sum[token_sent_sum['cumsum']>0].sort_values(['date', '
 # st.dataframe(token_sent_sum)
 
 
-st.title("Rook Multisig Testing Wallet")
-st.write("Learn More: [KIP-30](https://forum.rook.fi/t/kip-30-temporarily-empower-and-fund-a-strategy-testing-multisig/395)")
+st.title("Origin Testing Wallet")
 
 #-------------------------------------------------------------------------#
 # Show the amount of Rook that has been earned using columns
@@ -181,7 +180,7 @@ with roi_2:
     st.metric(label="ROI", value=f"{rebate_comb['rewards'].sum()/600000*100:.2f} % ROI")
     
 with roi_3:
-    st.metric(label="Effective API", value=f"{(rebate_comb['rewards'].sum()/600000*100) * (365/time_between.days):.2f} % Effective ROI")
+    st.metric(label="Effective APY", value=f"{(rebate_comb['rewards'].sum()/600000*100) * (365/time_between.days):.2f} % Effective APY")
         
         
 #-----------------------------------------------------------------------------------#
@@ -249,7 +248,7 @@ with stablecol_1:
     
     usdc_balance = float(bal[bal['name'] == 'USD Coin']['amount'])
 
-    change = (usdc_balance-150000)/150000
+    change = (usdc_balance-25000)/25000
     
     st.metric(label="USDC Balance", value = f"${usdc_balance:,.2f}", delta =f"{change:.2%}")
 
@@ -263,7 +262,7 @@ with stable_vol_1:
 with stablecol_2:
     st.subheader("DAI")
     dai_balance = float(bal[bal['name'] == 'Dai Stablecoin']['amount'])
-    change = (dai_balance-150000)/150000
+    change = (dai_balance-25000)/25000
     st.metric(label="DAI", value = f"${dai_balance:,.2f}", delta =f"{change:.2%}")
 
     # st.table(token_sent[token_sent['symbol_x']=='DAI'][['timestamp_x','path', 'token_amount_x']].sort_values('timestamp_x', ascending=False))
@@ -399,16 +398,4 @@ with trading_details_expander:
 
 
 
-with st.sidebar:
-    st.header("Multisig Testing Wallet")
-    
-    st.write("")
-    sidebar_expander_contracts = st.expander("Contract Addresses")
 
-with sidebar_expander_contracts:
-    st.subheader("Contracts associated with the testing wallet")
-    st.write("Multisig Wallet: 0x15635F556534B94E77bde0154d7f36B1f2532cDA")
-    st.subheader("Multisig Signers as specified in KIP 30")
-    st.write("Signer 1: 0x722f531740937fc21A2FaC7648670C7f2872A1c7")
-    st.write("Signer 2: 0xDAAf6D0ab259053Bb601eeE69880F30C7d8e5853")
-    st.write("Signer 3: 0x3C3ca4E5AbF0C1Bec701375ff31342d90D8C435E")
