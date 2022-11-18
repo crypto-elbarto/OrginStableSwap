@@ -290,7 +290,7 @@ with stable_vol_3:
 
 with stablecol_4:
     st.subheader("OUSD")
-    ousd_balance = float(bal[bal['name'] == 'Ousd']['amount'])
+    ousd_balance = float(bal[bal['name'] == 'OUSD']['amount'])
     change = (ousd_balance-150000)/150000
     st.metric(label="OUSD", value = f"${ousd_balance:,.0f}", delta =f"{change:.2%}")
 
